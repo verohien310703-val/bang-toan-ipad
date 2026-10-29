@@ -19,7 +19,10 @@ body.library-mode>header,body.library-mode>.shell{display:none}#libraryHome{heig
 
 .has-selection #toast{bottom:calc(var(--selection-tray-height,80px) + 36px)}
 
-body.local-mode #pair,body.local-mode #present,body.local-mode #libraryPair{display:none}body.local-mode #home{display:inline-flex}.offline-status{font-size:12px;line-height:1.7;color:#577797;background:#eaf1fa;padding:12px 16px;border-radius:8px;margin:0 0 12px}.offline-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}.offline-actions button,.offline-actions label{border:1px solid #d6e0ee;background:white;border-radius:7px;padding:10px 14px;min-height:40px;font-size:12px;cursor:pointer}#retrySend{background:#fff0dd;color:#805324}
+body.local-mode #pair,body.local-mode #present,body.local-mode #libraryPair{display:none}body.local-mode #home{display:inline-flex}.offline-status{font-size:12px;line-height:1.7;color:#577797;background:#eaf1fa;padding:12px 16px;border-radius:8px;margin:0 0 12px}.offline-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}.offline-actions button,.offline-actions label{color:#243c58;border:1px solid #a9bdd3;background:#fff;border-radius:7px;padding:10px 14px;min-height:40px;font-size:12px;cursor:pointer}#retrySend{background:#fff0dd;color:#805324}
 
 /* Pointer navigation owns gestures, including contacts in the page margins. */
 #viewport{touch-action:none}
+
+.offline-actions button:hover:not(:disabled),.offline-actions label:hover{color:#173b66;background:#e7f0fc;border-color:#7196c0}
+.offline-actions button:focus-visible,.offline-actions label:focus-within{outline:3px solid #3577d5;outline-offset:2px}
