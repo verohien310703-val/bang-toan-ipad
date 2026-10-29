@@ -1,4 +1,10 @@
 function samePoints(a,b){return a===b||Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((p,i)=>p.length===b[i].length&&p.every((v,j)=>v===b[i][j]));}
+export function replaceErasedInOrder(strokes,ids,replacements){
+ if(ids.length!==replacements.length||new Set(ids).size!==ids.length)throw Error('Thao tác tẩy không hợp lệ.');
+ const changes=new Map(ids.map((id,i)=>[id,replacements[i]]));let found=0;
+ const result=strokes.map(s=>{if(!changes.has(s.id))return s;found++;return changes.get(s.id);});
+ if(found!==ids.length)throw Error('Nội dung vừa thay đổi.');return result;
+}
 export function packEraseEdit(message,page){
  if(message.action!=='edit'||!page)return message;const byId=new Map(page.strokes.map(s=>[s.id,s])),polygons=[],index=new Map(),updates=[];
  if(message.ids.length!==message.strokes.length)return message;

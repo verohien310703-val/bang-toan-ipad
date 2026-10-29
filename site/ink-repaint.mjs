@@ -2,6 +2,19 @@ import {eraserRasterBounds} from './raster-bounds.mjs?v=0.23.11';
 const cachedBounds=new WeakMap();
 function visualBounds(s,scale){let value=cachedBounds.get(s);if(value?.scale===scale)return value.bounds;const bounds=eraserRasterBounds(s,scale);cachedBounds.set(s,{scale,bounds});return bounds;}
 const intersects=(a,b)=>a.x<=b.r&&a.r>=b.x&&a.y<=b.b&&a.b>=b.y;
+function uniquePoints(strokes){const map=new Map();for(const s of strokes)map.set(s.points,map.has(s.points)?null:s);return map;}
+function changedMaskBounds(a,b,scale){
+ if(!b||(a.kind||'ink')!=='ink'||a.points!==b.points||!('erasePolygons'in a||'erasePolygons'in b))return null;
+ for(const key of new Set([...Object.keys(a),...Object.keys(b)]))if(key!=='id'&&key!=='erasePolygons'&&a[key]!==b[key])return null;
+ const before=a.erasePolygons||[],after=b.erasePolygons||[];let common=0;
+ while(common<before.length&&common<after.length&&before[common]===after[common])common++;
+ const margin=2/scale,result=[];
+ for(const poly of [...before.slice(common),...after.slice(common)]){
+  let x=Infinity,y=Infinity,r=-Infinity,b=-Infinity;for(const p of poly){x=Math.min(x,p[0]);y=Math.min(y,p[1]);r=Math.max(r,p[0]);b=Math.max(b,p[1]);}
+  if(![x,y,r,b].every(Number.isFinite))return null;result.push({x:x-margin,y:y-margin,r:r+margin,b:b+margin});
+ }
+ return result;
+}
 // Plan against the last committed image, never against an unfinished render.
 // Changed image/text transforms use the full renderer; unchanged objects are
 // replayed under the region clip without assuming their visual bounds. Stroke order is retained when replaying a region.
@@ -13,7 +26,11 @@ export function planInkRepaint(before,after,surface,boundsFor=visualBounds){
  const changed=[...old.filter(s=>nextById.get(s.id)!==s),...visible.filter(s=>oldById.get(s.id)!==s)];
  // An explicit repaint may restore a cancelled transient eraser or loaded asset.
  if(!changed.length||changed.some(s=>['image','text'].includes(s.kind)))return full();
- const boxes=changed.map(s=>boundsFor(s,surface.scale));if(boxes.some(b=>![b.x,b.y,b.r,b.b].every(Number.isFinite)))return full();
+ const oldPoints=uniquePoints(old),nextPoints=uniquePoints(visible),oldPositions=new Map(old.map((s,i)=>[s,i])),nextPositions=new Map(visible.map((s,i)=>[s,i])),boxes=[];
+ for(const s of old.filter(s=>nextById.get(s.id)!==s)){const other=nextPoints.get(s.points),small=oldPositions.get(s)===nextPositions.get(other)?changedMaskBounds(s,other,surface.scale):null;boxes.push(...(small??[boundsFor(s,surface.scale)]));}
+ for(const s of visible.filter(s=>oldById.get(s.id)!==s)){const other=oldPoints.get(s.points),small=nextPositions.get(s)===oldPositions.get(other)?changedMaskBounds(s,other,surface.scale):null;boxes.push(...(small??[boundsFor(s,surface.scale)]));}
+ if(!boxes.length)return {mode:'region',x:0,y:0,width:0,height:0,strokes:[]};
+ if(boxes.some(b=>![b.x,b.y,b.r,b.b].every(Number.isFinite)))return full();
  const x=Math.max(0,Math.floor(Math.min(...boxes.map(b=>b.x))*surface.scale)-2),y=Math.max(0,Math.floor(Math.min(...boxes.map(b=>b.y))*surface.scale)-2),r=Math.min(surface.width,Math.ceil(Math.max(...boxes.map(b=>b.r))*surface.scale)+2),b=Math.min(surface.height,Math.ceil(Math.max(...boxes.map(b=>b.b))*surface.scale)+2);
  if(r<=x||b<=y)return {mode:'region',x:0,y:0,width:0,height:0,strokes:[]};
  if((r-x)*(b-y)>surface.width*surface.height*.65)return full();
