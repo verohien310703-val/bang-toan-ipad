@@ -2,9 +2,10 @@
 // A tap on the current tool retains its existing panel behavior.
 export function instantTool(button,shouldSwitch,ready){
  let handled=false,dispatching=false;
+ button.dataset.pencilTool='true';
  button.addEventListener('pointerdown',e=>{
   handled=false;
-  if(e.button!==0||e.isPrimary===false||!ready()||!shouldSwitch())return;
+  if(e.button!==0||e.isPrimary===false||!ready()||e.pointerType!=='pen'&&!shouldSwitch())return;
   handled=true;e.preventDefault();
   dispatching=true;try{button.click();}finally{dispatching=false;}
  });

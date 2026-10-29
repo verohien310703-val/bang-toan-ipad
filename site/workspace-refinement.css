@@ -26,3 +26,6 @@ body:not(.library-mode) #tools .workspace-actions img,body:not(.library-mode) #t
 @media(max-width:650px){body:not(.library-mode) .writing-tools{position:static;transform:none;max-width:none}}
 
 #pagePanel .page{touch-action:none}
+
+/* Tool contacts belong to the app before WebKit chooses native gestures. */
+button[data-pencil-tool]{touch-action:none}
