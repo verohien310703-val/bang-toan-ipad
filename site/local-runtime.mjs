@@ -1,22 +1,24 @@
+import {packEraseEdit} from './erase-wire.mjs?v=0.23.11';
+import {createLocalSaveChannel} from './local-save-channel.mjs';
 import {installOffline} from './offline-updates.mjs';
 import {LocalLibrary,openDatabase,readRecord,commitLibrary,writeAsset} from './local-store.mjs?v=0.23.11';
 import {applyLocal,validPage} from './local-model.mjs?v=0.23.11';
 export const localMode=new URLSearchParams(location.search).get('local')==='1'||!!document.querySelector('meta[name="bangtoan-independent"]');
 const version='0.23.11',clone=x=>structuredClone(x),uuid=()=>crypto.randomUUID();
 let db,library,state,undo=[],redo=[],sockets=new Set(),serial=Promise.resolve();
-const urls=new Map();
+const urls=new Map(),localSaver=createLocalSaveChannel();
 function task(fn){const result=serial.then(fn);serial=result.catch(()=>{});return result;}
 const ready=localMode?(async()=>{db=await openDatabase();const data=await readRecord(db,'library','main');library=new LocalLibrary(data);if(!data)await commitLibrary(db,library.data,0);state={...library.load(library.data.activeId),sessionId:uuid()};})():Promise.resolve();
 // Initialization failures are displayed by the socket and never replaced with an empty lesson.
 ready.catch(()=>{});
-function packet(type,extra={}){return {type,state:clone(state),durableRevision:state.revision,saveError:'',...extra};}
+function packet(type,extra={}){return {type,state:clone(state),durableRevision:state.revision,saveError:'',...clone(extra)};}
 function emitAll(m){for(const s of sockets)s.emit(m);}
 async function transact(fn){const next=new LocalLibrary(clone(library.data)),value=fn(next);await commitLibrary(db,next.data,library.data.epoch);library=next;return value;}
 export class LocalSocket{
  constructor(){this.readyState=0;this.bufferedAmount=0;sockets.add(this);setTimeout(()=>{ready.then(()=>{this.readyState=1;this.emit(packet('state',{appVersion:version,role:'host',preferences:library.data.preferences}));}).catch(e=>{document.querySelector('#connection').textContent='Không mở được dữ liệu trên thiết bị';this.emit({type:'error',error:'Không mở được kho lưu trên iPad: '+e.message});});},0);}
- emit(m){this.onmessage?.({data:JSON.stringify(m)});}
+ emit(m){this.onmessage?.({data:m});}
  close(){this.readyState=3;sockets.delete(this);}
- send(raw){const m=JSON.parse(raw);if(m.type==='claim'){this.emit({type:'claimed'});return;}if(m.type!=='op')return;task(async()=>{await ready;try{if(m.documentId!==state.documentId||m.sessionId!==state.sessionId)throw Error('Bài đang mở đã thay đổi.');if(m.revision!==state.revision)throw Error('Bài vừa thay đổi. Hãy thử lại.');const started=performance.now(),next=applyLocal(state,m,undo,redo),modeled=performance.now();const savedLibrary=library.withSavedSnapshot(next.state);const prepared=performance.now();await commitLibrary(db,savedLibrary.data,library.data.epoch);const finished=performance.now(),localTiming={modelMs:+(modeled-started).toFixed(2),prepareMs:+(prepared-modeled).toFixed(2),saveMs:+(finished-prepared).toFixed(2)};library=savedLibrary;state=next.state;undo=next.undo;redo=next.redo;emitAll(['stroke','erase','edit','clear','navigate'].includes(m.action)?{type:'ack',id:m.id,localTiming,revision:state.revision,durableRevision:state.revision,saveError:'',change:{action:m.action,pageId:m.pageId,stroke:m.stroke,strokes:m.strokes,ids:m.ids,index:m.index}}:packet('ack',{id:m.id,localTiming}));}catch(e){this.emit(packet('reject',{id:m.id,code:'LOCAL_SAVE',error:'Chưa lưu được; nét đang chờ được giữ nguyên. '+e.message}));}});}
+ send(raw){const m=typeof raw==='string'?JSON.parse(raw):raw;if(m.type==='claim'){this.emit({type:'claimed'});return;}if(m.type!=='op')return;task(async()=>{await ready;try{if(m.documentId!==state.documentId||m.sessionId!==state.sessionId)throw Error('Bài đang mở đã thay đổi.');if(m.revision!==state.revision)throw Error('Bài vừa thay đổi. Hãy thử lại.');const started=performance.now(),next=applyLocal(state,m,undo,redo),modeled=performance.now();const savedLibrary=library.withSavedSnapshot(next.state);const prepared=performance.now();const background=['stroke','erase','edit'].includes(m.action)?await localSaver.save(packEraseEdit(m,state.pages.find(p=>p.id===m.pageId)),library.data.epoch):null;if(background)savedLibrary.data.epoch=background.epoch;else await commitLibrary(db,savedLibrary.data,library.data.epoch);const finished=performance.now(),localTiming={modelMs:+(modeled-started).toFixed(2),prepareMs:+(prepared-modeled).toFixed(2),saveMs:+(finished-prepared).toFixed(2)};library=savedLibrary;state=next.state;undo=next.undo;redo=next.redo;emitAll(['stroke','erase','edit','clear','navigate'].includes(m.action)?{type:'ack',id:m.id,localTiming,revision:state.revision,durableRevision:state.revision,saveError:'',change:{action:m.action,pageId:m.pageId,stroke:m.stroke,strokes:m.strokes,ids:m.ids,index:m.index}}:packet('ack',{id:m.id,localTiming}));}catch(e){this.emit(packet('reject',{id:m.id,code:'LOCAL_SAVE',error:'Chưa lưu được; nét đang chờ được giữ nguyên. '+e.message}));}});}
 }
 export async function localAsset(id){await ready;if(!urls.has(id)){const blob=await readRecord(db,'assets',id);if(!blob)throw Error('Không tìm thấy tệp nền trên thiết bị.');urls.set(id,URL.createObjectURL(blob));}return urls.get(id);}
 function response(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});}

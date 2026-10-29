@@ -1,9 +1,10 @@
 import {drawStroke} from './ink.js?v=0.23.11';
 import {eraserRasterBounds} from './raster-bounds.mjs?v=0.23.11';
+import {rememberRaster} from './raster-reuse.mjs?v=0.23.11';
 export {eraserRasterBounds};
 const TILE=128,LIMIT=16*1024*1024,SOURCE_LIMIT=64*1024*1024;
 const boundsCache=new WeakMap();
-export function createTiledEraser({canvas,page,strokes,changes,makeCanvas=()=>document.createElement('canvas'),renderStroke=drawStroke,cacheSources=true,tileLimit=LIMIT}){
+export function createTiledEraser({canvas,page,strokes,changes,makeCanvas=()=>document.createElement('canvas'),renderStroke=drawStroke,rememberStroke=rememberRaster,cacheSources=true,tileLimit=LIMIT}){
  const transform=canvas.getContext('2d').getTransform?.(),ratio=Number.isFinite(transform?.a)&&transform.a>0&&transform.b===0&&transform.c===0&&transform.e===0&&transform.f===0?transform.a:canvas.width/page.width,tiles=new Map(),boxes=new Map();let bytes=0;
  const sources=new Map(),hidden=new Set();let sourceBytes=0,vectorRenders=0;
  for(const s of strokes){let cached=boundsCache.get(s);if(!cached||cached.ratio!==ratio){const b=eraserRasterBounds(s,ratio);cached={ratio,box:{x:b.x*ratio,y:b.y*ratio,r:b.r*ratio,b:b.b*ratio}};boundsCache.set(s,cached);}boxes.set(s,cached.box);}
@@ -43,5 +44,6 @@ export function createTiledEraser({canvas,page,strokes,changes,makeCanvas=()=>do
  }
  function applyBatch(polygons){for(let i=0;i<polygons.length;i+=4)applyChunk(polygons.slice(i,i+4));}
  function apply(poly){applyChunk([poly]);}
- return {apply,applyBatch,hideStrokes,destroy(){for(const t of tiles.values())dispose(t);tiles.clear();for(const s of sources.values())s.canvas.width=s.canvas.height=1;sources.clear();sourceBytes=0;},get memoryBytes(){return bytes+sourceBytes;},get vectorRenders(){return vectorRenders;},get tileCount(){return tiles.size;}};
+ function cacheEdits(replacements){let index=0;for(const change of changes.values()){const replacement=replacements[index++],raster=sources.get(change.stroke);if(!replacement||!raster)continue;try{for(const poly of change.polygons)cut(raster.canvas.getContext('2d'),poly,raster.x,raster.y);rememberStroke(canvas.getContext('2d'),replacement,raster.canvas,{x:raster.x,y:raster.y});}catch{/* Optional cache failure must not prevent saving the erasure. */}}}
+ return {apply,applyBatch,hideStrokes,cacheEdits,destroy(){for(const t of tiles.values())dispose(t);tiles.clear();for(const s of sources.values())s.canvas.width=s.canvas.height=1;sources.clear();sourceBytes=0;},get memoryBytes(){return bytes+sourceBytes;},get vectorRenders(){return vectorRenders;},get tileCount(){return tiles.size;}};
 }
