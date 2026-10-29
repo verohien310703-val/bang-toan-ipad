@@ -28,11 +28,14 @@ export function createNavigation(h){
  function touch(e,phase){
   if(!editor())return false;
   if(phase==='down'){
-   const suppressed=h.penRecent()||(h.drawing()&&!h.fingerDrawing());touches.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY,suppressed});
+   const palm=h.drawing()&&!h.fingerDrawing(),suppressed=h.penRecent()||palm;touches.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY,suppressed,palm,startX:e.clientX,startY:e.clientY});
    if(suppressed||h.fingerPan()||touchLock){touchLock=true;capture(e.pointerId);}
    if(activeTouches().length>=2){if(h.fingerDrawing())h.cancelFinger();if(!h.drawing()){touchLock=true;for(const t of touches.values())capture(t.id);pair=metrics(activeTouches());}}
   }else if(phase==='move'){
    const t=touches.get(e.pointerId);if(!t)return false;t.x=e.clientX;t.y=e.clientY;
+   // Contacts made during writing stay rejected. A new finger after pen-up
+   // may start panning once the grace period ends and movement is deliberate.
+   if(t.suppressed&&!t.palm&&!h.penRecent()&&!h.drawing()&&h.fingerPan()&&Math.hypot(t.x-t.startX,t.y-t.startY)>=10){t.suppressed=false;t.previous={x:t.x,y:t.y};}
    if(h.penRecent()&&!h.fingerDrawing()){suppressTouches();}
    const list=activeTouches();if(touchLock&&!blocked()){
     if(list.length>=2){const now=metrics(list);if(pair)anchor(scale*now.distance/pair.distance,{x:pair.x,y:pair.y},{x:now.x,y:now.y});pair=now;}
@@ -43,7 +46,7 @@ export function createNavigation(h){
   }
   for(const t of touches.values())t.previous={x:t.x,y:t.y};return touchLock||touches.get(e.pointerId)?.suppressed;
  }
- v.addEventListener('pointerdown',e=>{flushWheel();if(!editor())return;if(e.pointerType==='touch'&&h.instrumentPointer?.(e,'down')){capture(e.pointerId);stop(e);return;}if(e.pointerType==='pen'){suppressTouches();return;}if(e.pointerType==='touch'){if(touch(e,'down'))stop(e);return;}if((e.button===1||(space&&e.button===0))&&!blocked()){pan={id:e.pointerId,x:e.clientX,y:e.clientY};capture(e.pointerId);cursor();stop(e);}},true);
+ v.addEventListener('pointerdown',e=>{flushWheel();if(!editor())return;if(e.pointerType==='touch'&&h.instrumentPointer?.(e,'down')){capture(e.pointerId);stop(e);return;}if(e.pointerType==='pen'){for(const t of touches.values())t.palm=true;suppressTouches();return;}if(e.pointerType==='touch'){if(touch(e,'down'))stop(e);return;}if((e.button===1||(space&&e.button===0))&&!blocked()){pan={id:e.pointerId,x:e.clientX,y:e.clientY};capture(e.pointerId);cursor();stop(e);}},true);
  v.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&h.instrumentPointer?.(e,'move')){stop(e);return;}if(e.pointerType==='touch'){if(touch(e,'move'))stop(e);return;}if(pan?.id===e.pointerId){v.scrollLeft-=e.clientX-pan.x;v.scrollTop-=e.clientY-pan.y;pan.x=e.clientX;pan.y=e.clientY;remember();stop(e);}},true);
  for(const type of ['pointerup','pointercancel'])v.addEventListener(type,e=>{if(e.pointerType==='touch'&&h.instrumentPointer?.(e,e.type==='pointercancel'?'cancel':'up')){stop(e);return;}if(e.pointerType==='touch'){if(touch(e,'up'))stop(e);return;}if(pan?.id===e.pointerId){pan=null;cursor();stop(e);}},true);
  v.addEventListener('lostpointercapture',e=>{if(e.pointerType==='touch'||touches.has(e.pointerId))touch(e,'up');if(pan?.id===e.pointerId){pan=null;cursor();}},true);

@@ -30,7 +30,7 @@ export function createContinuousPages(h){
  async function renderNext(keep){if(rendering||!on()||suspended)return;let next;for(const s of keep){if(s.page.id!==activeId&&!same(s.signature,signature(s.page))){next=s;break;}}if(!next)return;
   rendering=true;const s=next,ticket=++s.ticket,gen=generation,p=s.page,sig=signature(p),canvas=document.createElement('canvas');canvas.className='sheet-preview';s.pending=true;
   const valid=()=>on()&&!suspended&&gen===generation&&s.ticket===ticket&&p.id!==activeId&&slots.get(p.id)===s&&visible.has(s);
-  try{const complete=await h.preview(p,canvas,900,valid);if(complete!==false&&valid()&&same(sig,signature(s.page))){s.canvas?.remove();if(s.canvas)s.canvas.width=s.canvas.height=1;s.error?.remove();s.error=null;s.canvas=canvas;s.signature=sig;s.el.append(canvas);}}
+  try{const complete=await h.preview(p,canvas,Math.max(900,Math.ceil(p.width*scale*Math.min(2,window.devicePixelRatio||1))),valid);if(complete!==false&&valid()&&same(sig,signature(s.page))){s.canvas?.remove();if(s.canvas)s.canvas.width=s.canvas.height=1;s.error?.remove();s.error=null;s.canvas=canvas;s.signature=sig;s.el.append(canvas);}}
   catch{if(valid()){s.signature=sig;s.error?.remove();const error=document.createElement('span');error.className='sheet-error';error.textContent='Chạm để mở trang và tải lại bản xem trước';s.el.append(error);s.error=error;}}
   finally{s.pending=false;if(s.canvas!==canvas)canvas.width=canvas.height=1;rendering=false;schedule();}
  }
