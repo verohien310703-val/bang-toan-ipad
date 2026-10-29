@@ -2,10 +2,11 @@ import {drawStroke} from './ink.js?v=0.23.11';
 import {eraserRasterBounds} from './raster-bounds.mjs?v=0.23.11';
 export {eraserRasterBounds};
 const TILE=128,LIMIT=16*1024*1024,SOURCE_LIMIT=64*1024*1024;
+const boundsCache=new WeakMap();
 export function createTiledEraser({canvas,page,strokes,changes,makeCanvas=()=>document.createElement('canvas'),renderStroke=drawStroke,cacheSources=true,tileLimit=LIMIT}){
  const transform=canvas.getContext('2d').getTransform?.(),ratio=Number.isFinite(transform?.a)&&transform.a>0&&transform.b===0&&transform.c===0&&transform.e===0&&transform.f===0?transform.a:canvas.width/page.width,tiles=new Map(),boxes=new Map();let bytes=0;
  const sources=new Map(),hidden=new Set();let sourceBytes=0,vectorRenders=0;
- for(const s of strokes){const b=eraserRasterBounds(s,ratio);boxes.set(s,{x:b.x*ratio,y:b.y*ratio,r:b.r*ratio,b:b.b*ratio});}
+ for(const s of strokes){let cached=boundsCache.get(s);if(!cached||cached.ratio!==ratio){const b=eraserRasterBounds(s,ratio);cached={ratio,box:{x:b.x*ratio,y:b.y*ratio,r:b.r*ratio,b:b.b*ratio}};boundsCache.set(s,cached);}boxes.set(s,cached.box);}
  function dispose(t){for(const l of t.layers){bytes-=l.canvas.width*l.canvas.height*4;l.canvas.width=l.canvas.height=1;}t.flat.width=t.flat.height=1;bytes-=t.w*t.h*4;}
  function source(s){
   let saved=sources.get(s);if(saved){sources.delete(s);sources.set(s,saved);return saved;}
@@ -34,7 +35,7 @@ export function createTiledEraser({canvas,page,strokes,changes,makeCanvas=()=>do
   for(const poly of polygons){const xs=poly.map(p=>p[0]*ratio),ys=poly.map(p=>p[1]*ratio),left=Math.max(0,Math.min(...xs)),top=Math.max(0,Math.min(...ys)),right=Math.min(canvas.width-1,Math.max(...xs)),bottom=Math.min(canvas.height-1,Math.max(...ys));if(right<left||bottom<top)continue;const touched=new Set();
    for(let ty=Math.floor(top/TILE);ty<=Math.floor(bottom/TILE);ty++)for(let tx=Math.floor(left/TILE);tx<=Math.floor(right/TILE);tx++){
     const t=get(tx,ty);dirty.set(tx+':'+ty,t);
-    for(const l of t.layers)if(l.erasable){const old=l.stroke.erasePolygons?.length||0,pending=changes.get(l.stroke.id)?.polygons.length||0;if(old+pending<1500||touched.has(l.stroke.id)){cut(l.canvas.getContext('2d'),poly,t.x,t.y);touched.add(l.stroke.id);}}
+    for(const l of t.layers)if(l.erasable){const box=boxes.get(l.stroke);if(box.r<left||box.x>right||box.b<top||box.y>bottom)continue;const old=l.stroke.erasePolygons?.length||0,pending=changes.get(l.stroke.id)?.polygons.length||0;if(old+pending<1500||touched.has(l.stroke.id)){cut(l.canvas.getContext('2d'),poly,t.x,t.y);touched.add(l.stroke.id);}}
    }
    for(const id of touched){let c=changes.get(id);if(!c){c={stroke:strokes.find(s=>s.id===id),polygons:[]};changes.set(id,c);}c.polygons.push(poly);}
   }
