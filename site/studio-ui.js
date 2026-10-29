@@ -1,3 +1,4 @@
+import {instantTool} from './instant-tool.mjs';
 import {syncToolAppearance} from './tool-appearance.mjs?v=0.23.11';
 import {enablePageReorder} from './page-reorder.mjs?v=0.23.11';
 import {refineWorkspace} from './workspace-refinement.mjs?v=0.23.11';
@@ -82,3 +83,8 @@ createFloatingToolbar();
 refineWorkspace({icon});
 
 enablePageReorder();
+
+for(const b of document.querySelectorAll('[data-tool]'))instantTool(b,()=>window.BangToan.currentTool!==b.dataset.tool,()=>window.BangToan.canSwitchTool());
+instantTool(eraser,()=>window.BangToan.currentTool!=='eraser',()=>window.BangToan.canSwitchTool());
+instantTool(pen,()=>window.BangToan.currentTool!=='pen'||window.BangToan.penStyle==='pencil',()=>window.BangToan.canSwitchTool());
+instantTool(pencil,()=>window.BangToan.currentTool!=='pen'||window.BangToan.penStyle!=='pencil',()=>window.BangToan.canSwitchTool());
