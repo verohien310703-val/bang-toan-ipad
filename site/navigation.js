@@ -1,6 +1,6 @@
 import {hasBlockingPanel} from './panels.js?v=0.23.11';
 export function createNavigation(h){
- const v=h.viewport,paper=h.paper,min=.05,max=8,views=new Map(),touches=new Map();let scale=1,mode='width',key=null,pair=null,space=false,pan=null,touchLock=false,safariScale=1,frame=0,documentKey=null,viewPageId=null,wheelFrame=0,wheelZoom=null;
+ const v=h.viewport,paper=h.paper,min=.05,max=8,views=new Map(),touches=new Map();let scale=1,mode='width',key=null,pair=null,space=false,pan=null,touchLock=false,safariScale=1,frame=0,documentKey=null,viewPageId=null,wheelFrame=0,wheelZoom=null,pinchFrame=0,pinchPending=null;
  const clamp=x=>Math.max(min,Math.min(max,x));
  const editor=()=>h.page()&&!document.body.classList.contains('library-mode');
  const blocked=()=>!editor()||h.drawing()||hasBlockingPanel();
@@ -17,17 +17,20 @@ export function createNavigation(h){
  function queueWheel(ratio,point){wheelZoom??={scale,from:point,to:point};const next=clamp(wheelZoom.scale*ratio),r=next/wheelZoom.scale;wheelZoom.to={x:point.x+(wheelZoom.to.x-point.x)*r,y:point.y+(wheelZoom.to.y-point.y)*r};wheelZoom.scale=next;if(!wheelFrame)wheelFrame=requestAnimationFrame(flushWheel);}
  function zoomBy(ratio,point){flushWheel();return anchor(scale*ratio,point||center());}
  function resize(){if(!editor()||h.drawing()||!v.clientWidth||!v.clientHeight)return;if(mode==='manual'){const c=center();anchor(scale,c);}else{const continuous=h.flow()?.enabled,relative=continuous?(v.scrollTop-h.flow().offset()+v.clientHeight/2)/scale:0;h.flow()?.ignoreScroll();scale=clamp(base(mode));size();if(continuous)v.scrollTop=h.flow().offset()+relative*scale-v.clientHeight/2;remember();}}
- function pageChanged(){cancelWheel();if(!h.page())return;const sameDocument=documentKey===h.documentKey?.();if(sameDocument)remember();const preserve=sameDocument&&h.flow()?.preserving;key=h.key();documentKey=h.documentKey?.();viewPageId=h.page().id;const saved=views.get(key);if(!preserve){if(saved){mode=saved.mode;scale=saved.mode==='manual'?saved.scale:clamp(base(saved.mode));}else if(!sameDocument||!h.flow()?.enabled){mode=h.viewer()?'fit':'width';scale=clamp(base(mode));}}size();if(!preserve){h.flow()?.ignoreScroll();v.scrollLeft=saved?.left||0;v.scrollTop=(h.flow()?.enabled?h.flow().offset():0)+(saved?.top||0)*(h.flow()?.enabled&&saved?scale/saved.scale:1);pair=null;touches.clear();touchLock=false;}remember();}
+ function pageChanged(){cancelPinch();cancelWheel();if(!h.page())return;const sameDocument=documentKey===h.documentKey?.();if(sameDocument)remember();const preserve=sameDocument&&h.flow()?.preserving;key=h.key();documentKey=h.documentKey?.();viewPageId=h.page().id;const saved=views.get(key);if(!preserve){if(saved){mode=saved.mode;scale=saved.mode==='manual'?saved.scale:clamp(base(saved.mode));}else if(!sameDocument||!h.flow()?.enabled){mode=h.viewer()?'fit':'width';scale=clamp(base(mode));}}size();if(!preserve){h.flow()?.ignoreScroll();v.scrollLeft=saved?.left||0;v.scrollTop=(h.flow()?.enabled?h.flow().offset():0)+(saved?.top||0)*(h.flow()?.enabled&&saved?scale/saved.scale:1);pair=null;touches.clear();touchLock=false;}remember();}
  function flowChanged(){cancelWheel();views.clear();mode='width';scale=clamp(base(mode));size();v.scrollLeft=0;v.scrollTop=h.flow()?.enabled?h.flow().offset():0;remember();}
  function stop(e){e.preventDefault();e.stopImmediatePropagation();}
  function cursor(){document.body.classList.toggle('temporary-hand',space||!!pan);document.body.classList.toggle('navigation-dragging',!!pan);}
  function capture(id){try{v.setPointerCapture(id);}catch{}}
  function activeTouches(){return [...touches.values()].filter(t=>!t.suppressed);}
  function metrics(list){const a=list[0],b=list[1];return {distance:Math.max(5,Math.hypot(a.x-b.x,a.y-b.y)),x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
- function suppressTouches(){for(const t of touches.values())t.suppressed=true;pair=null;touchLock=touches.size>0;}
+ function suppressTouches(){cancelPinch();for(const t of touches.values())t.suppressed=true;pair=null;touchLock=touches.size>0;}
+ function flushPinch(){cancelAnimationFrame(pinchFrame);pinchFrame=0;const next=pinchPending;pinchPending=null;if(next&&pair){anchor(scale*next.distance/pair.distance,{x:pair.x,y:pair.y},{x:next.x,y:next.y});pair=next;}}
+ function cancelPinch(){cancelAnimationFrame(pinchFrame);pinchFrame=0;pinchPending=null;}
  function touch(e,phase){
   if(!editor())return false;
   if(phase==='down'){
+   flushPinch();
    const palm=h.drawing()&&!h.fingerDrawing(),suppressed=h.penRecent()||palm;touches.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY,suppressed,palm,startX:e.clientX,startY:e.clientY});
    if(suppressed||h.fingerPan()||touchLock){touchLock=true;capture(e.pointerId);}
    if(activeTouches().length>=2){if(h.fingerDrawing())h.cancelFinger();if(!h.drawing()){touchLock=true;for(const t of touches.values())capture(t.id);pair=metrics(activeTouches());}}
@@ -38,10 +41,11 @@ export function createNavigation(h){
    if(t.suppressed&&!t.palm&&!h.penRecent()&&!h.drawing()&&h.fingerPan()&&Math.hypot(t.x-t.startX,t.y-t.startY)>=10){t.suppressed=false;t.previous={x:t.x,y:t.y};}
    if(h.penRecent()&&!h.fingerDrawing()){suppressTouches();}
    const list=activeTouches();if(touchLock&&!blocked()){
-    if(list.length>=2){const now=metrics(list);if(pair)anchor(scale*now.distance/pair.distance,{x:pair.x,y:pair.y},{x:now.x,y:now.y});pair=now;}
+    if(list.length>=2){const now=metrics(list);if(pair){pinchPending=now;if(!pinchFrame)pinchFrame=requestAnimationFrame(flushPinch);}else pair=now;}
     else if(list.length===1&&h.fingerPan()&&!t.suppressed){const old=t.previous;if(old){v.scrollLeft-=t.x-old.x;v.scrollTop-=t.y-old.y;remember();}pair=null;}
    }
   }else if(phase==='up'){
+   flushPinch();
    const handled=touchLock||touches.get(e.pointerId)?.suppressed;touches.delete(e.pointerId);pair=null;for(const t of touches.values())t.previous={x:t.x,y:t.y};if(!touches.size)touchLock=false;return handled;
   }
   for(const t of touches.values())t.previous={x:t.x,y:t.y};return touchLock||touches.get(e.pointerId)?.suppressed;
@@ -69,7 +73,7 @@ export function createNavigation(h){
   if(!cmd&&!e.altKey&&['PageUp','PageDown'].includes(e.key)){e.preventDefault();document.querySelector(e.key==='PageUp'?'#prev':'#next').click();}
  });
  document.addEventListener('keyup',e=>{if(e.code==='Space'){space=false;cursor();}});
- function suspend(){cancelWheel();remember();space=false;pan=null;pair=null;touches.clear();touchLock=false;safariScale=1;cursor();}
+ function suspend(){cancelPinch();cancelWheel();remember();space=false;pan=null;pair=null;touches.clear();touchLock=false;safariScale=1;cursor();}
  function resume(){const saved=views.get(key);space=false;pan=null;pair=null;touches.clear();touchLock=false;safariScale=1;cursor();if(!editor())return;if(saved){scale=saved.scale;mode=saved.mode;}if(mode!=='manual')scale=clamp(base(mode));size();if(saved){h.flow()?.ignoreScroll();v.scrollLeft=saved.left;v.scrollTop=(h.flow()?.enabled?h.flow().offset():0)+saved.top*(h.flow()?.enabled?scale/saved.scale:1);}remember();}
  window.addEventListener('blur',suspend);window.addEventListener('bangtoan:before-document',suspend);
  v.addEventListener('scroll',()=>{if(!frame)frame=requestAnimationFrame(()=>{frame=0;remember();window.dispatchEvent(new Event('bangtoan:view'));});},{passive:true});
@@ -77,5 +81,5 @@ export function createNavigation(h){
  document.querySelector('#zoomSlider').oninput=e=>anchor(Number(e.target.value)/100);
  for(const b of document.querySelectorAll('[data-zoom-percent]'))b.onclick=()=>{anchor(Number(b.dataset.zoomPercent)/100);b.closest('details').open=false;};
  for(const b of document.querySelectorAll('[data-view-fit]'))b.onclick=()=>{fit(b.dataset.viewFit);b.closest('details').open=false;};
- return {resize,pageChanged,flowChanged,zoomBy,fit,suspend,resume,get scale(){return scale;}};
+ return {resize,pageChanged,flowChanged,zoomBy,fit,suspend,resume,get interacting(){return touchLock||!!pan;},get scale(){return scale;}};
 }

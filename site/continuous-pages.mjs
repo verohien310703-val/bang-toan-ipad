@@ -26,7 +26,7 @@ export function createContinuousPages(h){
  function focus(id=activeId,relativeTop=0,left=0){if(!on())return;ignoreScroll();v.scrollTop=offset(id)+relativeTop;v.scrollLeft=left;schedule();}
  function schedule(){if(!frame)frame=requestAnimationFrame(()=>{frame=0;refresh();});}
  function nearby(){const top=v.scrollTop-v.clientHeight,bottom=v.scrollTop+v.clientHeight*2,out=[];for(const p of pages){const s=slots.get(p.id),y=s.el.offsetTop;if(y+p.height*scale>=top&&y<=bottom)out.push(s);}return out.sort((a,b)=>Math.abs(a.el.offsetTop-v.scrollTop)-Math.abs(b.el.offsetTop-v.scrollTop)).slice(0,7);}
- function refresh(){if(!on()||suspended)return;visible=new Set(nearby());for(const s of slots.values())if(!visible.has(s)&&s.page.id!==activeId&&(s.canvas||s.pending))release(s);renderNext(visible);}
+ function refresh(){if(!on()||suspended||contacts.size)return;visible=new Set(nearby());for(const s of slots.values())if(!visible.has(s)&&s.page.id!==activeId&&(s.canvas||s.pending))release(s);renderNext(visible);}
  async function renderNext(keep){if(rendering||!on()||suspended)return;let next;for(const s of keep){if(s.page.id!==activeId&&!same(s.signature,signature(s.page))){next=s;break;}}if(!next)return;
   rendering=true;const s=next,ticket=++s.ticket,gen=generation,p=s.page,sig=signature(p),canvas=document.createElement('canvas');canvas.className='sheet-preview';s.pending=true;
   const valid=()=>on()&&!suspended&&gen===generation&&s.ticket===ticket&&p.id!==activeId&&slots.get(p.id)===s&&visible.has(s);
@@ -47,7 +47,7 @@ export function createContinuousPages(h){
   if(!writing)return;e.preventDefault();e.stopImmediatePropagation();if(!h.canSelect()){h.waitNotice();return;}
   scrollPending=false;fromScroll=true;let ok;try{ok=h.select(slot.dataset.sheetId);}finally{fromScroll=false;}if(ok)h.begin(e);
  },true);
- for(const type of ['pointerup','pointercancel','lostpointercapture'])window.addEventListener(type,e=>{contacts.delete(e.pointerId);clearTimeout(timer);timer=setTimeout(selectVisible,120);},true);
+ for(const type of ['pointerup','pointercancel','lostpointercapture'])window.addEventListener(type,e=>{contacts.delete(e.pointerId);schedule();clearTimeout(timer);timer=setTimeout(selectVisible,120);},true);
  for(const type of ['touchstart','touchend'])stack.addEventListener(type,e=>{if(!paper.contains(e.target)){h.contact?.(e);if(e.touches.length<2&&e.cancelable)e.preventDefault();}},{passive:false});
  let pull=null,wheelPull=0,lastWheel=0,adding=false;
  const hint=document.createElement('div');hint.id='pullAddHint';hint.textContent='Kéo thêm để thêm trang';hint.hidden=true;v.append(hint);
