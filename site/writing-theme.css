@@ -1,0 +1,76 @@
+/* Writing workspace reference theme; the document library is a separate phase. */
+body:not(.library-mode){--nav:#24385f;--blue:#3baac4}
+body:not(.library-mode) .document-nav{background:#23345c;height:50px;border:0;padding:0 14px}
+body:not(.library-mode) .shell{height:calc(100dvh - 50px)}
+body:not(.library-mode) .nav-start{align-self:stretch;gap:9px;background:#2c4771;border-radius:12px 12px 0 0;padding:0 10px;max-width:62%}
+body:not(.library-mode) .document-name strong{font-weight:400;font-size:14px}
+body:not(.library-mode) .document-kind{display:none}
+body:not(.library-mode) .header-action{width:38px;min-width:38px;padding:7px;background:transparent;border:0;color:#edf3ff}
+body:not(.library-mode) .header-action>span{display:none}
+body:not(.library-mode) .mini-connection{font-size:10px}
+body:not(.library-mode) #tools{background:#2e4e80;border:0;box-shadow:none;gap:9px;padding:4px 12px;min-height:48px}
+body:not(.library-mode) #tools button{background:transparent;border:0;color:#e0e8f1;border-radius:9px;width:36px;min-width:36px;height:36px;min-height:36px;padding:7px}
+body:not(.library-mode) #tools img.icon-image{filter:brightness(0) invert(.89)}
+body:not(.library-mode) #tools button.selected{background:#d3dae1;color:#26384a}
+body:not(.library-mode) #tools .tool:not(.selected){background:transparent;color:#e0e8f1;box-shadow:none}
+body:not(.library-mode) #tools .tool.selected{box-shadow:none}
+body:not(.library-mode) #tools .tool:hover:not(:disabled){background:#ffffff16}
+body:not(.library-mode) #tools .tool.selected:hover:not(:disabled){background:#d3dae1}
+body:not(.library-mode) #tools #graphTool,body:not(.library-mode) #tools #geometryTools{width:36px;min-width:36px;background:transparent;border:0;color:#e0e8f1;padding:7px}
+body:not(.library-mode) #tools button.selected img.icon-image{filter:brightness(0) saturate(100%) invert(21%) sepia(22%) saturate(1075%) hue-rotate(167deg)}
+body:not(.library-mode) #graphTool>span,body:not(.library-mode) #geometryTools>span{display:none}
+body:not(.library-mode) .writing-tools{gap:7px;border:0}
+body:not(.library-mode) #viewport{background:#1d1d20}
+body:not(.library-mode) #paper{box-shadow:0 1px 5px #0007}
+body:not(.library-mode) .pen-shelf,body:not(.library-mode) .eraser-shelf{background:#2b2b2f;color:#e5e5e8;border:1px solid #55545b;border-radius:15px;box-shadow:0 6px 14px #0003;min-height:49px;height:49px;padding:4px 7px;gap:5px}
+body:not(.library-mode) :is(.pen-shelf,.eraser-shelf) button{color:#e3e3e6;border:0;background:transparent;border-radius:10px}
+body:not(.library-mode) :is(.pen-shelf,.eraser-shelf) button:hover{background:#ffffff12}
+body:not(.library-mode) :is(.pen-shelf,.eraser-shelf) img.icon-image{filter:brightness(0) invert(.9);width:25px;height:25px}
+body:not(.library-mode) :is(.pen-shelf,.eraser-shelf) button.selected{background:#317e91;color:white}
+body:not(.library-mode) :is(.pen-shelf,.eraser-shelf) button.selected img.icon-image{filter:brightness(0) invert(1)}
+body:not(.library-mode) .pen-shelf .widths{border-color:#ffffff24}
+body:not(.library-mode) .pen-shelf .widths button{color:#fff}
+body:not(.library-mode) .pen-shelf .widths button[aria-pressed=true]{background:#55555b}
+body:not(.library-mode) .pen-shelf .widths button span{background:#f1f1f4}
+body:not(.library-mode) .pen-shelf .palette{border-color:#ffffff24}
+body:not(.library-mode) .pen-shelf .swatch.selected{outline-color:#b7c2d0}
+body:not(.library-mode) .pen-shelf .swatch[aria-pressed=true]:after{border-color:#d4dbe7}
+body:not(.library-mode) .eraser-shelf [data-eraser-size] span{background:repeating-conic-gradient(#f9f9fb 0% 25%,#d9dae0 0% 50%) 50%/6px 6px;border:1px solid #fff8}
+body:not(.library-mode) .eraser-shelf [data-eraser-size].selected{background:transparent;outline:2px solid #54b4ed}
+body:not(.library-mode) #eraserShelf #eraserType{background:#4b4b51;color:#f0f0f3;border:0}
+body:not(.library-mode) main>.floating-history{background:#29292d;border:1px solid #53535b;border-radius:17px;color:#dedee5;box-shadow:none;height:44px;padding:2px 5px}
+body:not(.library-mode) main>.floating-history img.icon-image{filter:brightness(0) invert(.9)}
+body:not(.library-mode) main>.floating-history button:hover{background:#ffffff10}
+body:not(.library-mode) .floating-pagebar{background:#29292de8;color:#ddd;border-color:#55555b}
+body:not(.library-mode) #pageNo{color:#e3e3e8}
+.workbench-dialog.tool-panel{background:#1e1e21;border-color:#434348;color:#e2e2e6;box-shadow:0 9px 24px #0005}
+.tool-panel .wb-heading{background:#1e1e21;border:0;height:42px}
+.tool-panel .wb-heading h2{color:#eee;font-size:14px;text-align:center;flex:1}
+.tool-panel .wb-heading button{background:transparent;color:#bbb}
+.tool-panel .wb-field,.tool-panel .wb-check,.tool-panel .wb-options,.tool-panel .wb-hint{color:#c9c9ce!important}
+.tool-panel :is(.pen-options,.eraser-modes,.selection-filters){background:#2d2d32;border-color:#414147;color:#ddd}
+.tool-panel :is(.eraser-modes,.pen-style-cards) button{background:transparent;color:#ddd;border-color:transparent}
+.tool-panel :is(.eraser-modes,.pen-style-cards) button.selected{background:#36363c;border-color:transparent}
+.tool-panel :is(.eraser-modes,.pen-style-cards) img.icon-image{filter:brightness(0) invert(.9)}
+.tool-panel .wb-field select,.tool-panel .wb-field input:not([type=range]):not([type=checkbox]){background:#303036;color:#eee;border-color:#4a4a52}
+.tool-panel[data-panel=pen]{width:min(330px,calc(100vw - 24px));padding:0 14px 13px;background:#1e1e21}
+.tool-panel[data-panel=pen] .wb-heading{height:35px;background:#1e1e21}
+.tool-panel[data-panel=pen] #wbClose{display:none}
+.tool-panel[data-panel=pen] #wbSample{height:72px!important}
+.tool-panel[data-panel=pen] .pen-testbar{display:none}
+.tool-panel[data-panel=pen] .pen-style-cards{margin:6px 0 12px}
+.tool-panel[data-panel=pen] .pen-style-cards button{height:72px;gap:7px;padding:10px 5px}
+.tool-panel[data-panel=pen] .pen-style-cards img{width:27px;height:27px}
+.tool-panel[data-panel=pen] .pen-control-field{min-height:64px;padding:9px 0 5px}
+.tool-panel[data-panel=pen] .pen-control-field>output{top:9px}
+.tool-panel[data-panel=pen] .pen-tuning{background:#2e2e33}
+.tool-panel[data-panel=pen] .pen-slider-track input::-webkit-slider-thumb{width:24px;height:24px;margin-top:-10.5px}
+#shelfRestore{position:absolute;z-index:43;width:43px;height:43px;padding:8px;border-radius:13px;background:#d2d5dc;color:#25485c;border:1px solid #656873;box-shadow:0 3px 9px #0004;touch-action:none}
+#shelfRestore img{width:27px;height:27px;pointer-events:none}
+#toolPanelArrow{position:fixed;z-index:71;width:14px;height:14px;background:#1e1e21;transform:rotate(45deg);pointer-events:none;border-radius:2px}
+body[data-shelf-minimized=true] :is(.pen-shelf,.eraser-shelf){display:none!important}
+body.library-mode #shelfRestore,body.viewer #shelfRestore{display:none!important}
+body.read-only #shelfRestore{display:none!important}
+body:is([data-shelf-dock=left],[data-shelf-dock=right]) :is(.pen-shelf,.eraser-shelf){height:auto;min-height:0}
+@media(min-width:651px){body[data-shelf-dock=top] :is(.pen-shelf,.eraser-shelf){left:50%;max-width:calc(100% - 32px)}}
+@media(max-width:650px){body:not(.library-mode) #tools{gap:3px;padding:4px 6px}body:not(.library-mode) .writing-tools{gap:2px}body:not(.library-mode) #tools button{width:32px;min-width:32px;padding:5px}body:not(.library-mode) .nav-start{max-width:48%}body:not(.library-mode) .mini-connection{display:none}}

@@ -1,0 +1,6 @@
+// Local quadratic fit preserves curvature, unlike a positional moving average.
+// Only presentation changes: no temporal queue, endpoint lag, or raw-point edits.
+export function adaptiveStabilize(ps,strength=0,scale=1){
+ if(!strength||ps.length<5)return ps;const d=[0];for(let i=1;i<ps.length;i++)d.push(d.at(-1)+Math.hypot(ps[i][0]-ps[i-1][0],ps[i][1]-ps[i-1][1]));const total=d.at(-1),radius=Math.min((3+9*strength)/scale,total*.2),limit=(.2+2*strength)/scale;if(radius<.1)return ps;let lo=0,hi=0;
+ return ps.map((p,i)=>{if(!i||i===ps.length-1)return p;while(d[lo]<d[i]-radius)lo++;while(hi+1<ps.length&&d[hi+1]<=d[i]+radius)hi++;const m=[0,0,0,0,0],x=[0,0,0],y=[0,0,0];for(let j=lo;j<=hi;j++){const t=(d[j]-d[i])/radius,w=(1-t*t)**2;let power=1;for(let k=0;k<5;k++){m[k]+=w*power;if(k<3){x[k]+=w*power*ps[j][0];y[k]+=w*power*ps[j][1];}power*=t;}}const c0=m[2]*m[4]-m[3]*m[3],c1=m[2]*m[3]-m[1]*m[4],c2=m[1]*m[3]-m[2]*m[2],det=m[0]*c0+m[1]*c1+m[2]*c2;if(Math.abs(det)<1e-8)return p;let dx=(c0*x[0]+c1*x[1]+c2*x[2])/det-p[0],dy=(c0*y[0]+c1*y[1]+c2*y[2])/det-p[1];const n=Math.hypot(dx,dy),edge=Math.min(1,d[i]/radius,(total-d[i])/radius),f=Math.min(1,limit/(n||1))*edge;return [p[0]+dx*f,p[1]+dy*f,...p.slice(2)];});
+}

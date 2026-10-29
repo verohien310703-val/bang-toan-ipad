@@ -1,0 +1,19 @@
+import {directionalBody,directionalNib} from './fountain-direction.mjs?v=0.23.11';
+import {calibratedBody} from './pen-calibration.mjs?v=0.23.11';
+import {fountainWidth,fountainNib} from './fountain-response.mjs?v=0.23.11';
+// Versioned rendering profile for new ball/fountain strokes only.
+// Arc-distance parameters are independent of event rate and raw samples are immutable.
+import {curvedInkPoints} from './ink-smoothing.mjs?v=0.23.11';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),smooth=t=>t*t*(3-2*t);
+export function fountainOutline(points,size,tuning={},scale=1){
+ if(tuning.calligraphic&&points.length===2){const a=points[0],b=points[1],n=Math.min(4000,Math.max(2,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])*Math.max(.05,scale)/1.25)));points=Array.from({length:n+1},(_,i)=>a.map((v,k)=>v+(b[k]-v)*i/n));}const ps=curvedInkPoints(points);if(ps.length<2)return null;
+ scale=clamp(Number.isFinite(scale)?scale:1,.05,8);
+ const d=[0];for(let i=1;i<ps.length;i++)d.push(d.at(-1)+Math.hypot(ps[i][0]-ps[i-1][0],ps[i][1]-ps[i-1][1]));
+ const length=d.at(-1),radius=tuning.rounded?Math.max(3/scale,size*.25):2.5/scale,pressures=[],speeds=[];let lo=0,hi=0;
+ for(let i=0;i<ps.length;i++){while(d[lo]<d[i]-radius)lo++;while(hi+1<ps.length&&d[hi+1]<=d[i]+radius)hi++;let sum=0,speed=0,w=0;for(let j=lo;j<=hi;j++){const q=Math.max(0,1-Math.abs(d[j]-d[i])/radius);sum+=q*clamp(ps[j][2]??.5,0,1);speed+=q*(ps[j][3]??((tuning.calibrated||tuning.directional)?.5:0));w+=q;}pressures.push(w?sum/w:.5);speeds.push(w?speed/w:0);}
+ const left=[],right=[],radii=[],sweep=[],sensitivity=clamp(tuning.sensitivity??.5,0,1),flatness=clamp(tuning.flatness??.33,0,1),taper=clamp(tuning.taper??.25,0,1),short=clamp((length*scale-12)/18,0,1),taperLength=Math.min(length*.22,Math.max(2/scale,size*1.6));
+ for(let i=0;i<ps.length;i++){let a=i-1,b=i+1;while(a>=0&&Math.hypot(ps[i][0]-ps[a][0],ps[i][1]-ps[a][1])<.01)a--;while(b<ps.length&&Math.hypot(ps[b][0]-ps[i][0],ps[b][1]-ps[i][1])<.01)b++;if(tuning.rounded){const reach=Math.max(1.5/scale,size*.4);a=i;b=i;while(a>0&&d[i]-d[a]<reach)a--;while(b<ps.length-1&&d[b]-d[i]<reach)b++;}const before=ps[Math.max(0,a)],after=ps[Math.min(ps.length-1,b)],dx=after[0]-before[0],dy=after[1]-before[1],len=Math.hypot(dx,dy)||1,angle=Math.atan2(dy,dx)+Math.PI/4,minor=1-.6*flatness,nib=tuning.calligraphic?fountainNib(angle-Math.PI/2,flatness):Math.sqrt(Math.cos(angle)**2+minor*minor*Math.sin(angle)**2)/Math.sqrt(minor),width=tuning.calligraphic?fountainWidth(pressures[i],sensitivity)/(1+.22*Math.min(3,speeds[i])):clamp(1+(pressures[i]-.5)*2*sensitivity,.3,1.7),edge=smooth(clamp(Math.min(tuning.taperStart===false?Infinity:d[i],tuning.taperEnd===false?Infinity:length-d[i])/(taperLength||1),0,1)),r=size/2*(tuning.directional?directionalBody(pressures[i],sensitivity,angle-Math.PI/2,flatness,speeds[i]):tuning.calibrated?calibratedBody(pressures[i],sensitivity,!!tuning.brush,angle-Math.PI/2,flatness,speeds[i]):width*nib)*(tuning.swept?(1-taper*short*(tuning.taperStart===false?0:1-smooth(clamp(d[i]/(taperLength||1),0,1))))*(1-taper*short*(tuning.endTaper??0)*(tuning.taperEnd===false?0:1-smooth(clamp((length-d[i])/(taperLength||1),0,1)))):(1-(tuning.calligraphic?1:.75)*taper*short*(1-edge)));if(tuning.swept)sweep.push({center:ps[i],radius:r/directionalNib(angle-Math.PI/2,flatness)});radii.push(r);left.push([ps[i][0]-dy/len*r,ps[i][1]+dx/len*r]);right.push([ps[i][0]+dy/len*r,ps[i][1]-dx/len*r]);}
+ return {left,right,sweep,start:ps[0],end:ps.at(-1),startRadius:radii[0],endRadius:radii.at(-1)};
+}
+
+export function traceRoundedOutline(ctx,o){const ps=[...o.right,...o.left.slice().reverse()];if(ps.length<3)return;const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];ctx.moveTo(...mid(ps.at(-1),ps[0]));for(let i=0;i<ps.length;i++)ctx.quadraticCurveTo(...ps[i],...mid(ps[i],ps[(i+1)%ps.length]));ctx.closePath();}

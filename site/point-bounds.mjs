@@ -1,0 +1,2 @@
+const completed=new WeakMap();
+export function pointBounds(s){const cached=s.penEnded===true&&completed.get(s.points);if(cached)return cached;let x=Infinity,y=Infinity,r=-Infinity,b=-Infinity;for(const p of s.points){x=Math.min(x,p[0]);y=Math.min(y,p[1]);r=Math.max(r,p[0]);b=Math.max(b,p[1]);}const box={x,y,w:Math.max(1,r-x),h:Math.max(1,b-y)};if(s.penEnded===true)completed.set(s.points,box);return box;}

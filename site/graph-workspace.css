@@ -1,0 +1,74 @@
+#tools #graphTool{display:inline-flex!important;align-items:center;justify-content:center;flex:none;min-width:72px;width:auto;padding:0 8px;border:1px solid #8db6d0;border-radius:7px;font-size:12px;color:#eef8ff;white-space:nowrap}
+#graphWorkspace{width:min(1320px,calc(100vw - 32px));height:min(870px,calc(100dvh - 32px));max-width:none;max-height:none;padding:0;border:1px solid #39546c;border-radius:18px;background:#f4f7fb;color:#213a50;box-shadow:0 24px 90px #05132170;overflow:hidden}
+#graphWorkspace[open]{display:flex;flex-direction:column}#graphWorkspace::backdrop{background:#0b1928a8}#graphWorkspace>header{display:flex;align-items:center;justify-content:space-between;padding:19px 24px;background:#193249;color:#edf7ff;flex:none}#graphWorkspace h2{margin:5px 0 0;font-size:23px;font-weight:600}.graph-eyebrow{font-size:10px;letter-spacing:1.5px;color:#91b8cd}
+#graphWorkspace button{cursor:pointer;border:1px solid #cfdae4;background:#fff;color:#29485f;border-radius:8px;padding:9px 12px;font:inherit;touch-action:manipulation}#graphWorkspace button:hover{background:#eaf2fa}#graphWorkspace button:disabled{opacity:.45;cursor:default}#graphWorkspace #graphClose{font-size:25px;background:#ffffff10;color:white;border-color:#ffffff30;padding:2px 12px}#graphWorkspace input{font:inherit;color:#264156;min-width:0}#graphWorkspace input:focus{outline:2px solid #38a3bb;outline-offset:1px}
+.graph-layout{display:grid;grid-template-columns:310px minmax(0,1fr);flex:1;min-height:0}.graph-layout>aside{overflow:auto;padding:20px 16px;border-right:1px solid #d8e2eb;background:#f8fafc}.graph-section{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 15px;font-size:14px}.graph-section:not(:first-child){margin-top:26px}.graph-section #graphAdd{font-size:12px;color:#137e94;border-color:#add5de;background:#edf8fa}.graph-row{background:#fff;border:1px solid #dbe4ec;border-radius:10px;margin:0 0 10px;padding:10px 8px}.graph-row>div{display:flex;align-items:center;gap:6px}.graph-formula{width:100%;border:0;padding:7px 2px;background:none;font-family:ui-monospace,SFMono-Regular,Consolas,monospace!important;font-size:16px!important}.graph-color{width:21px;height:25px;padding:0;border:0;flex:none;background:transparent}.graph-visible{width:14px;height:14px;accent-color:#168ca2;flex:none}.graph-row span{white-space:nowrap;font-size:14px}.graph-row .graph-delete{border:0;padding:3px 5px;font-size:19px;color:#708496}.graph-error{display:block;color:#c54c49;font-size:12px;line-height:1.4;margin-top:3px}.graph-error:empty{display:none}.graph-help{font-size:12px;line-height:1.6;color:#62788b;margin:16px 0 24px}.graph-help summary{cursor:pointer;color:#227f95}.graph-muted{font-size:12px;line-height:1.5;color:#718494}#graphFind{width:100%;font-size:12px!important}#graphResults{display:flex;flex-direction:column;gap:6px;margin-top:12px}#graphResults button{font-size:11px;line-height:1.5;text-align:left;overflow-wrap:anywhere}
+.graph-stage{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}.graph-stage>nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap;min-height:53px;padding:8px 12px;border-bottom:1px solid #e0e7ed;font-size:12px}.graph-stage>nav>div{display:flex;gap:5px}.graph-stage nav button{padding:5px 10px!important}.graph-stage nav label{display:flex;gap:5px;align-items:center}#graphCoords{margin-left:auto;font-size:11px;color:#728698;font-variant-numeric:tabular-nums}.graph-canvas-wrap{flex:1;min-height:150px;overflow:hidden;position:relative}#graphCanvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}#graphCanvas:active{cursor:grabbing}.graph-ranges{display:flex;align-items:end;gap:12px;padding:12px;border-top:1px solid #dfe7ef;background:#fbfcfe;flex:none}.graph-ranges label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#698094;flex:1;min-width:0}.graph-ranges input{width:100%;padding:7px;border:1px solid #d2dee8;border-radius:6px;background:white;font-size:14px}.graph-ranges button{font-size:12px!important}
+#graphWorkspace>footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;padding:13px 22px;border-top:1px solid #d9e3ec;background:#f5f8fb}#graphStatus{font-size:12px;line-height:1.4;color:#637b8e}#graphWorkspace #graphInsert{background:#147f96;color:white;border-color:#147f96;font-weight:600;white-space:nowrap}
+@media(max-width:850px){#graphWorkspace{width:calc(100vw - 12px);height:calc(100dvh - 12px);border-radius:12px}.graph-layout{grid-template-columns:245px minmax(0,1fr)}#graphWorkspace>header{padding:12px 16px}.graph-layout>aside{padding:14px 10px}.graph-ranges{gap:6px;padding:8px}.graph-stage>nav{gap:8px}#graphCoords{display:none}#graphWorkspace>footer{padding:10px 14px}}
+@media(max-width:600px){#tools #graphTool{font-size:0;min-width:34px;padding:0 7px}#graphTool::before{content:'ƒ';font-size:18px}.graph-layout{display:flex;flex-direction:column}.graph-layout>aside{max-height:180px;min-height:110px;border-right:0;border-bottom:1px solid #d8e2eb;padding:10px}.graph-section{margin-bottom:8px}.graph-help{display:none}.graph-stage{flex:1}.graph-row{margin-bottom:6px;padding:5px 8px}#graphWorkspace>footer{flex-wrap:wrap;gap:8px}#graphWorkspace h2{font-size:19px}.graph-eyebrow{font-size:8px}#graphInsert{width:100%}.graph-ranges input{font-size:16px!important}.graph-ranges{flex-wrap:wrap}.graph-ranges button{padding:7px!important}}
+#graphWorkspace .graph-layout>aside{display:block!important;position:static!important;width:auto!important;flex-shrink:1;min-width:0;height:auto;z-index:auto}#graphWorkspace>footer{display:flex!important}
+
+#graphWorkspace .graph-layout>aside{color:#294358;text-align:left}#graphWorkspace .graph-layout>aside p{text-align:left}#graphWorkspace .graph-row span{color:#758da1}
+dialog#graphWorkspace:not(.tool-panel):not(#pagePanel){max-height:calc(100dvh - 12px)}#graphWorkspace .graph-layout{overflow:hidden}@media(max-width:600px){#graphWorkspace .graph-layout>aside{flex:0 1 180px}#graphWorkspace .graph-stage{flex:1 1 0}}
+#graphWorkspace>footer{height:auto;min-height:60px}#graphStatus{display:block;white-space:normal}
+#inlineGraphBar{position:fixed;z-index:35;display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #c6d8e9;border-radius:12px;background:#fff;box-shadow:0 5px 24px #17345025;color:#26415a;max-width:calc(100vw - 12px);flex-wrap:wrap;font-size:12px}
+#inlineGraphBar[hidden],#inlineGraphCanvas[hidden]{display:none!important}
+#inlineGraphBar button{background:#edf4fa;color:#26415a;border:0;border-radius:7px;min-width:34px;min-height:34px;padding:6px 9px}
+#inlineGraphBar button[aria-pressed=true]{background:#2476d4;color:white}
+#inlineGraphBar span{font-size:11px;color:#607389}
+#inlineGraphCanvas{position:fixed;z-index:30;touch-action:none;cursor:grab;outline:2px solid #2675d8;outline-offset:-2px}
+@media(max-width:600px){#inlineGraphBar span{display:none}#inlineGraphBar{gap:3px}#inlineGraphBar strong{font-size:11px}#inlineGraphBar button{padding:5px 7px}}
+/* Geometry cards share the same form rhythm on desktop and tablet. */
+#graphWorkspace .graph-layout{grid-template-columns:365px minmax(0,1fr)}
+.revolution-card{border:1px solid #d7e2ec;border-radius:12px;padding:14px;margin:18px 0;background:#fff}
+#graphWorkspace .revolution-card .graph-section{margin:0 0 14px;color:#315b7b;font-size:13px}
+.rev-enable{display:flex;gap:5px;align-items:center;font-size:12px;font-weight:400}
+.rev-field{display:flex;flex-direction:column;gap:5px;font-size:12px;margin:9px 0;color:#5a7186}
+#graphWorkspace .rev-field select{width:100%;padding:8px 6px;border:1px solid #d1dde8;background:#fff;color:#294358;border-radius:6px;font-size:13px}
+.rev-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.rev-two label{font-size:12px;color:#62788b;display:flex;gap:5px;align-items:center;min-width:0}
+#graphWorkspace .rev-two input{width:100%;min-width:0;padding:7px;border:1px solid #d1dde8;border-radius:6px;font-size:14px}
+.rev-controls,.rev-views{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:10px 0;font-size:12px}
+#graphWorkspace .rev-controls button,#graphWorkspace .rev-views button{padding:7px 9px;font-size:12px}
+#graphWorkspace [data-rev-axis][aria-pressed=true],#graphWorkspace #revRotate[aria-pressed=true]{background:#2476d4;border-color:#2476d4;color:#fff}
+.rev-views>span{width:100%;color:#62788b;font-size:11px}
+.rev-angle{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:12px;margin-top:14px;color:#62788b}
+.rev-angle input{grid-column:1/-1;width:100%;accent-color:#2476d4}.rev-angle output{color:#294358;font-variant-numeric:tabular-nums}
+#graphWorkspace #revPlay{background:#2476d4;border-color:#2476d4;color:white}
+#graphWorkspace #revExample{font-size:11px;padding:7px;text-align:left;width:100%;color:#2476d4;background:#f0f6fc;border:0}
+#inlineGraphBar .rev-inline{display:flex;align-items:center;gap:4px;flex-wrap:wrap}#inlineGraphBar .rev-inline[hidden]{display:none}
+#inlineGraphBar .rev-inline small{font-size:10px;color:#728497;margin:0 4px}#inlineGraphBar button[data-action=play]{color:#176b9a;background:#e6f4fc}
+#remoteGraphCanvas{position:fixed;z-index:29;pointer-events:none}#remoteGraphCanvas[hidden]{display:none!important}
+@media(max-width:850px){#graphWorkspace .graph-layout{grid-template-columns:300px minmax(0,1fr)}#inlineGraphBar{max-width:calc(100vw - 12px)}}
+@media(max-width:600px){#graphWorkspace .graph-layout{display:flex}.revolution-card{padding:10px}.rev-two{margin:9px 0}#inlineGraphBar .rev-inline small{display:none}#inlineGraphBar .rev-inline button{font-size:11px;min-height:32px}.revolution-card .graph-muted{font-size:11px}}
+#graphWorkspace .rev-two input{background:#fff;color:#294358}#graphWorkspace .rev-angle input{background:transparent;padding:0;min-height:26px}
+#tools #solidTool{display:inline-flex;align-items:center;gap:5px;min-width:90px;width:auto;padding:0 8px;color:#e4eff9;font-size:12px}
+#solidWorkspace{width:min(490px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#242830;color:#edf2f8;border:1px solid #ffffff25;border-radius:16px;padding:20px}
+#solidWorkspace .wb-heading{background:transparent;padding:0 0 12px;color:inherit}
+#solidWorkspace h2{color:inherit}
+#solidWorkspace p{font-size:13px;line-height:1.6}
+.solid-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.solid-choices button{min-height:56px;white-space:normal;background:#354355;color:#edf5fc;border:1px solid #70849b;border-radius:10px;font-size:14px}
+.math-options{display:flex;flex-direction:column;gap:10px;padding:12px;margin-bottom:16px;border-radius:10px;background:#edf4fa;font-size:12px}
+.math-options label{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.math-options input[type=range]{width:100%;accent-color:#2476d4}
+.math-options output{margin-left:auto}
+.math-options small{line-height:1.5;color:#5a7085}
+#inlineMathOptions{max-width:100%}
+#inlineGraphBar{width:max-content;max-width:min(760px,calc(100vw - 16px))}
+#inlineMathOptions .inline-math-controls{position:fixed;z-index:36;width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 150px);box-shadow:0 5px 24px #17345025}
+#inlineMathOptions summary{cursor:pointer;padding:8px;border-radius:7px;background:#edf4fa;list-style:none}
+.inline-math-controls{width:min(360px,calc(100vw - 42px));max-height:min(410px,calc(100dvh - 190px));overflow:auto;overscroll-behavior:contain;padding:12px;box-sizing:border-box;background:#fff;border:1px solid #c6d8e9;border-radius:10px;display:flex;flex-direction:column;gap:12px;color:#26415a}
+.inline-math-controls :is(label,#inlineSolidControls){display:flex;flex-direction:column;gap:7px;min-width:0}
+.inline-math-controls .inline-display{display:flex;gap:10px;flex-wrap:wrap}
+.inline-math-controls .inline-display label,.inline-math-controls label:has(input[type=checkbox]){flex-direction:row;align-items:center}
+.inline-math-controls .inline-display label{display:flex!important;flex-direction:row!important;white-space:nowrap;gap:6px}
+.inline-math-controls input[type=checkbox]{width:16px;min-width:16px;height:16px;flex:0 0 16px;margin:0}
+.inline-math-controls input[type=text],.inline-math-controls select{box-sizing:border-box;width:100%;min-width:0;padding:8px;border:1px solid #bdcddd;border-radius:6px;color:#26415a;background:#fff;font-size:16px}
+.inline-math-controls input[type=range]{width:100%;accent-color:#2476d4}
+.inline-math-controls output{font-variant-numeric:tabular-nums;font-size:12px}
+.inline-math-controls [hidden]{display:none!important}
+#inlineFormulaRows label+label{margin-top:10px}
+.inline-math-controls p{font-size:12px;color:#aa3f3f;line-height:1.5;margin:0}
+@media(max-width:600px){#tools #solidTool{min-width:34px;width:34px;font-size:0}#solidTool:before{content:'◇';font-size:22px}#inlineMathOptions[open]{flex-basis:100%}.inline-math-controls{width:100%}}

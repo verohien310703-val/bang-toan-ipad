@@ -1,0 +1,2 @@
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),smooth=t=>t*t*(3-2*t);
+export function endTaperAmount(points,speeds,scale=1,pauseMs=0){if(pauseMs>=140||!speeds?.length||points.length<2)return 0;let distance=0,weighted=0;for(let i=points.length-1;i>0&&distance<10;i--){const d=Math.min(10-distance,Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])*scale);weighted+=d*((speeds[i]??0)+(speeds[i-1]??0))/2;distance+=d;}if(!distance)return 0;const speed=weighted/distance;return smooth(clamp((speed-.08)/.55,0,1))*(1-smooth(clamp((pauseMs-25)/115,0,1)));}

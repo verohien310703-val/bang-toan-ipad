@@ -1,0 +1,13 @@
+/* Visible-viewport sizing keeps controls reachable above the iPad keyboard. */
+#pagePanelShade{pointer-events:none}
+dialog:not(.tool-panel):not(#pagePanel){top:calc(var(--app-visible-top,0px) + var(--app-visible-height,100dvh)/2);left:calc(var(--app-visible-left,0px) + var(--app-visible-width,100vw)/2);max-height:calc(var(--app-visible-height,100dvh) - 24px)}
+#pagePanel[data-display=window]{top:calc(var(--app-visible-top,0px) + var(--app-visible-height,100dvh)/2);left:calc(var(--app-visible-left,0px) + var(--app-visible-width,100vw)/2);height:min(730px,calc(var(--app-visible-height,100dvh) - 24px));max-height:calc(var(--app-visible-height,100dvh) - 24px)}
+#pagePanel[data-display=sidebar]{top:max(var(--app-visible-top,0px),var(--app-tools-bottom,106px));height:calc(var(--app-visible-top,0px) + var(--app-visible-height,100dvh) - max(var(--app-visible-top,0px),var(--app-tools-bottom,106px)));max-height:var(--app-visible-height,100dvh)}
+#pagePanel[open]{display:flex;flex-direction:column}
+#pagePanel header,#pagePanel .page-filterbar,#pageSearch,#pageSearchHint{flex:none}
+#pagePanel #pagePanelBody,#pagePanel[data-kind=search] #pagePanelBody{flex:1;min-height:0;height:auto}
+#pageEmpty{position:static;margin:16px 5px;padding:0;pointer-events:none}
+#workbenchDialog.tool-panel{max-width:calc(var(--app-visible-width,100vw) - 20px)}
+#workbenchDialog:not(.tool-panel) #wbContent{max-height:calc(var(--app-visible-height,100dvh) - 110px)}
+#pageCardMenu{max-height:calc(var(--app-visible-height,100dvh) - 90px);overflow:auto;overscroll-behavior:contain}
+body.library-mode #pagePanel,body.library-mode #pagePanelShade{display:none!important}
